@@ -9,6 +9,8 @@ import android.speech.tts.TextToSpeech
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView.LayoutManager
 import pl.onrwir.a7minutesworkoutapp.databinding.ActivityExerciseBinding
 import pl.onrwir.a7minutesworkoutapp.databinding.ActivityMainBinding
 import java.lang.Exception
@@ -28,6 +30,8 @@ class ExerciseActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
     private var tts: TextToSpeech? = null
     private var player: MediaPlayer? = null
+
+    private var exerciseAdapter : ExerciseStatusAdapter? = null
 
 
 
@@ -51,9 +55,15 @@ class ExerciseActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         }
 
         setupRestView()
+        setupExerciseStatusRecyclerView()
 
     }
 
+    private fun setupExerciseStatusRecyclerView(){
+        binding?.rvExerciseStatus?.layoutManager = LinearLayoutManager(this,LinearLayoutManager.HORIZONTAL, false)
+        exerciseAdapter = ExerciseStatusAdapter(exerciseList!!)
+        binding?.rvExerciseStatus?.adapter = exerciseAdapter
+    }
     private fun setupRestView(){
         try{
             val soundURI = Uri.parse("android.resource://pl.onrwir.a7minutesworkoutapp/" + R.raw.press_start)
@@ -117,6 +127,10 @@ class ExerciseActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
             override fun onFinish() {
                 currentExercisePosition++
+
+                exerciseList!![currentExercisePosition].setIsSelected(true)
+                exerciseAdapter!!.notifyItemChanged(currentExercisePosition)
+
                 setupExerciseView()
             }
         }.start()
@@ -132,6 +146,11 @@ class ExerciseActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             }
 
             override fun onFinish() {
+
+                exerciseList!![currentExercisePosition].setIsSelected(false)
+                exerciseList!![currentExercisePosition].setIsComplete(true)
+                exerciseAdapter!!.notifyItemChanged(currentExercisePosition)
+
                 if(currentExercisePosition < exerciseList?.size!! -1){
                     setupRestView()
                 }else{
