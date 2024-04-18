@@ -3,18 +3,20 @@ package pl.onrwir.a7minutesworkoutapp
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import pl.onrwir.a7minutesworkoutapp.databinding.ActivityBmiBinding
-import pl.onrwir.a7minutesworkoutapp.databinding.ActivityMainBinding
 import java.math.BigDecimal
 import java.math.RoundingMode
 
 class BMIActivity : AppCompatActivity() {
-    private var binding: ActivityBmiBinding? = null
 
+    companion object {
+        private const val METRIC_UNITS_VIEW = "METRIC_UNITS_VIEW"
+        private const val US_UNITS_VIEW = "US_UNITS_VIEW"
+    }
+
+    private var binding: ActivityBmiBinding? = null
+    private var currentVisibleView: String = METRIC_UNITS_VIEW
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,6 +34,16 @@ class BMIActivity : AppCompatActivity() {
             onBackPressed()
         }
 
+        makeVisibleMetricUnitsView()
+
+        binding?.rgUnits?.setOnCheckedChangeListener{_, checkedId: Int ->
+            if(checkedId == R.id.rbMetricUnits){
+                makeVisibleMetricUnitsView()
+            }else{
+                makeVisibleUsUnitsView()
+            }
+        }
+
         binding?.btnCalculateUnits?.setOnClickListener {
             if (validateMetricUnit()){
                 val heightValue : Float = binding?.etMetricUnitHeight?.text.toString().toFloat() / 100
@@ -46,6 +58,37 @@ class BMIActivity : AppCompatActivity() {
             }
         }
 
+    }
+
+    private fun makeVisibleMetricUnitsView(){
+        currentVisibleView = METRIC_UNITS_VIEW
+
+        binding?.tilMetricUnitHeight?.visibility = View.VISIBLE
+        binding?.tilMetricUnitWeight?.visibility = View.VISIBLE
+
+        binding?.tilUsUnitHeightFeet?.visibility = View.GONE
+        binding?.tilUsUnitHeightInch?.visibility = View.GONE
+
+        binding?.etMetricUnitHeight?.text!!.clear()
+        binding?.etMetricUnitWeight?.text!!.clear()
+        binding?.etMetricUnitWeight?.text!!.clear()
+
+        binding?.llDisplayBMIResult?.visibility = View.INVISIBLE
+    }
+
+    private fun makeVisibleUsUnitsView(){
+        currentVisibleView = US_UNITS_VIEW
+
+        binding?.tilMetricUnitHeight?.visibility = View.GONE
+
+        binding?.tilUsUnitHeightFeet?.visibility = View.VISIBLE
+        binding?.tilUsUnitHeightInch?.visibility = View.VISIBLE
+
+        binding?.etUsUnitHeightFeet?.text!!.clear()
+        binding?.etUsUnitHeightInch?.text!!.clear()
+        binding?.etMetricUnitWeight?.text!!.clear()
+
+        binding?.llDisplayBMIResult?.visibility = View.INVISIBLE
     }
 
     private fun displayBMIResult(bmi:Float){
